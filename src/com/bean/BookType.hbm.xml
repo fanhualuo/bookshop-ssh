@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2016-12-27 14:02:24 by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.bean.BookType" table="s_booktype">
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="native" />
+        </id>
+        <property name="booktype" type="java.lang.String">
+            <column name="BOOKTYPE" />
+        </property>
+        <!-- 由这个表主导管理inverse="false"，级联所有操作cascade="all"  -->
+        <set name="books" table="s_book" cascade="all" inverse="false" lazy="false">
+            <key>
+                <column name="BOOKTYPE" />
+            </key>
+            <one-to-many class="com.bean.Book" />
+        </set>
+    </class>
+</hibernate-mapping>

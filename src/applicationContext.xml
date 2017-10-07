@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+
+	<!-- 导入资源文件 -->
+	<context:property-placeholder location="classpath:db.properties" />
+	<!-- 1,配置 C3P0 数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+
+		<property name="initialPoolSize" value="${jdbc.initPoolSize}"></property>
+		<property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+
+
+	</bean>
+
+
+	<!-- 2,配置 Hibernate 的 SessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 配置数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 配置 hibernate 映射文件的位置及名称, 可以使用通配符 -->
+		<property name="mappingLocations" value="classpath:com/bean/*.hbm.xml">
+		</property>
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+				<prop key="hibernate.show_sql">flase</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.autoReconnect">true</prop>
+				<!-- 最终确定是因为数据链接自动关闭，而不是spring和hibernate的问题。 解决办法是：打开数据库的重连接。 -->
+			</props>
+		</property>
+
+	</bean>
+
+
+	<!--3，配置 Spring 的声明式事务 -->
+	<!-- 3.1配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 开启注解事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 3.2 配置事务属性, 需要事务管理器 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" read-only="false" />
+			<tx:method name="delete*" read-only="false" />
+			<tx:method name="update*" read-only="false" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
+		</tx:attributes>
+
+	</tx:advice>
+
+
+	<!-- 3.3 配置事务切点, 并把切点和事务属性关联起来 -->
+	<aop:config>
+		<!-- 设置安全线程可用范围（使getCurrentSession()方法可用） -->
+		<aop:pointcut expression="execution(* com.ssh.*.*(..))"
+			id="txPointcut" />
+
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />
+	</aop:config>
+
+
+
+	<!-- ____________________________类的配置__________________________________ -->
+
+
+	<!-- 4.1配置dao类 -->
+	<bean name="userDao" class="com.ssh.dao.UserImp">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<bean name="bookDao" class="com.ssh.dao.BookDaoImp1">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<bean name="bookTypeDao" class="com.ssh.dao.BookTypeDaoImp1">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<bean name="orderDao" class="com.ssh.dao.OrderDaoImp1">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+
+
+
+
+	<!-- 配置自动扫描的包 -->
+	<context:component-scan base-package="com.*.*"></context:component-scan>
+
+
+</beans>

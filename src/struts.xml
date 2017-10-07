@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN" 
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<!-- 文件限制大小 -->
+	<constant name="struts.multipart.maxSize" value="99000000" />
+
+	<package name="default" namespace="/" extends="struts-default">
+
+
+
+
+		<!-- 注册拦截器 -->
+		<interceptors>
+			<!-- 自定义拦截器（权限校验） -->
+			<interceptor name="authentication" class="com.ssh.filter.Filter_quanxian"></interceptor>
+
+			<!-- 自定义拦截器栈 -->
+			<interceptor-stack name="loginStack">
+				<!-- 为Action显示引用拦截器后，默认的拦截器defaultStack不再生效，需要手工引用 -->
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				
+				<interceptor-ref name="authentication">
+					
+				</interceptor-ref>
+
+
+			</interceptor-stack>
+
+		</interceptors>
+
+		<!--引用拦截器栈 <interceptor-ref name="mystack"></interceptor-ref> -->
+		<!-- 默认拦截器 <default-interceptor-ref name="loginStack" /> -->
+		<default-interceptor-ref name="loginStack" />
+		
+		
+		<!-- 定义全局Result -->
+		<global-results>
+			<!-- 当返回login视图名时，转入/login.jsp页面 -->
+			<result name="login" type="redirect">/index.jsp</result>
+		</global-results>
+
+
+
+		<action name="user_*" method="{1}" class="userAction">
+			<result name="success" type="redirectAction">book_findall</result>
+			<result name="logon">/index.jsp</result>
+			<result name="input">/index.jsp</result>
+			<result name="zhuce">/zhuce.jsp</result>
+			<result name="update" type="redirectAction">order_show</result>
+
+			<result name="findquestion1">/findpassword2.jsp</result>
+			<result name="findlogin1">/findpassword1.jsp</result>
+
+			<result name="findquestion2">/findpassword3.jsp</result>
+			<result name="findlogin2">/findpassword2.jsp</result>
+
+			<result name="findquestion3">/findpassword3.jsp</result>
+			<result name="findlogin3">/findpassword3.jsp</result>
+
+		</action>
+
+		<action name="book_*" method="{1}" class="bookAction">
+			<result name="success">/user/showbook.jsp</result>
+		</action>
+
+
+		<!-- 购物车action -->
+		<action name="gouwuche_*" method="{1}" class="gouwucheAction">
+			<result name="save" type="redirectAction">book_findall</result>
+			<result name="delete" type="redirectAction">gouwuche_show</result>
+			<result name="show">/user/showgouwuche.jsp</result>
+		</action>
+
+		<action name="order_*" method="{1}" class="orderAction">
+			<result name="submit" type="redirectAction">order_show</result>
+			<result name="delete" type="redirectAction">gouwuche_show</result>
+			<result name="show">/user/usermanager.jsp</result>
+		</action>
+
+		<!-- ___________________后台管_______________________ -->
+
+		<action name="userManager_*" method="{1}" class="userManagerAction">
+
+			<result name="find">/manager/user.jsp</result>
+			<result name="update" type="redirectAction">userManager_find</result>
+			<result name="delete" type="redirectAction">userManager_find</result>
+			<result name="success">/manager/index.jsp</result>
+			<result name="input">/manager/login.jsp</result>
+			<result name="updatejsp">/manager/userupdate.jsp</result>
+
+
+		</action>
+
+		<action name="orderManager_*" method="{1}" class="orderManagerAction">
+			<result name="find">/manager/order.jsp</result>
+			<result name="find_user">/manager/order.jsp</result>
+			<result name="update" type="redirectAction">orderManager_find</result>
+			<result name="updatejsp">/manager/orderupdate.jsp</result>
+			<result name="delete" type="redirectAction">orderManager_find</result>
+		</action>
+
+		<action name="bookManager_*" method="{1}" class="bookManagerAction">
+			<result name="find">/manager/book.jsp</result>
+			<result name="save" type="redirectAction">bookManager_find</result>
+			<result name="savejsp">/manager/booksave.jsp</result>
+			<result name="update" type="redirectAction">bookManager_find</result>
+			<result name="updatejsp">/manager/bookupdate.jsp</result>
+			<result name="delete" type="redirectAction">bookManager_find</result>
+		</action>
+
+		<action name="bookTypeManager_*" method="{1}" class="bookTypeManagerAction">
+			<result name="find">/manager/booktype.jsp</result>
+			<result name="delete" type="redirectAction">bookTypeManager_find</result>
+			<result name="update" type="redirectAction">bookTypeManager_find</result>
+			<result name="save" type="redirectAction">bookTypeManager_find</result>
+			<result name="updatejsp">/manager/booktypeupdate.jsp</result>
+		</action>
+
+
+
+		<!-- 文件上传和下载配置 -->
+		<action name="upload_*" method="{1}" class="fileUploadAction">
+			<result name="success" type="redirectAction">bookManager_find</result>
+			<result name="input">/manager/uploaderror.jsp</result>
+			<interceptor-ref name="fileUpload">
+				<!-- 文件过滤 -->
+				<param name="allowedTypes">image/bmp,image/png,image/gif,image/jpeg</param>
+				<!-- 文件大小, 以字节为单位 -->
+				<param name="maximumSize">300000</param>
+			</interceptor-ref>
+			<!-- 默认拦截器必须放在fileUpload之后，否则无效 -->
+			<interceptor-ref name="defaultStack" />
+		</action>
+
+		<action name="downLoad_*" method="{1}" class="downLoadAction">
+			<result type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">attachment;filename=${fileFileName}</param>
+				<param name="bufferSize">4096</param>
+			</result>
+		</action>
+
+	</package>
+
+
+
+
+</struts> 

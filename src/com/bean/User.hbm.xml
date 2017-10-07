@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2016-10-20 11:00:29 by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.bean.User" table="s_user">
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="native" />
+        </id>
+        <property name="username" type="java.lang.String">
+            <column name="USERNAME" />
+        </property>
+        <property name="password" type="java.lang.String">
+            <column name="PASSWORD" />
+        </property>
+        <property name="question" type="java.lang.String">
+            <column name="QUESTION" />
+        </property>
+        <property name="answer" type="java.lang.String">
+            <column name="ANSWER" />
+        </property>
+        <property name="quanxian" type="int">
+            <column name="QUANXIAN" />
+        </property>
+        
+        <!-- 由这个表主导管理inverse="false"，级联所有操作cascade="all"  -->
+        <set name="orders" table="s_order" cascade="all" inverse="false" lazy="false">
+            <key>
+                <column name="user" />
+            </key>
+            <one-to-many class="com.bean.Order" />
+        </set>
+         
+        
+    </class>
+</hibernate-mapping>
